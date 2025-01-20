@@ -1,0 +1,156 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model users {
+  id       Int       @id @default(autoincrement())
+  name     String
+  email    String
+  username String
+  password String
+  resumes  resumes[]
+}
+
+model resume_user_info {
+  id              Int       @id @default(autoincrement())
+  user_first_name String
+  user_last_name  String
+  user_heading    String
+  user_email      String
+  user_phone      String
+  user_address    String
+  Resume          resumes[]
+}
+
+model resumes {
+  id                  Int      @id @default(autoincrement())
+  user_id             Int
+  created_at          DateTime @default(now())
+  updated_at          DateTime @updatedAt
+  template_id         Int
+  resume_user_info_id Int
+
+  user                   users                    @relation(fields: [user_id], references: [id])
+  resume_user_info       resume_user_info         @relation(fields: [resume_user_info_id], references: [id])
+  Skills_categories      skills_categories[]
+  certifications_resumes certifications_resumes[]
+  works_resumes          works_resumes[]
+  links_networks         links_networks[]
+  education_resumes      education_resumes[]
+}
+
+model skills_categories {
+  id         Int    @id @default(autoincrement())
+  skill_type String
+  resume_id  Int
+
+  resume resumes  @relation(fields: [resume_id], references: [id])
+  Skills skills[]
+}
+
+model skills {
+  id                Int    @id @default(autoincrement())
+  skill_name        String
+  skill_category_id Int
+
+  category skills_categories @relation(fields: [skill_category_id], references: [id])
+}
+
+model certificacion_info {
+  id Int @id @default(autoincrement())
+
+  certificacion_name        String
+  certificacion_institution String
+  url                       String
+  sort_order                Int
+  resume_id                 Int
+
+  certifications_resumes certifications_resumes[]
+}
+
+model certifications_resumes {
+  id                    Int @id @default(autoincrement())
+  resume_id             Int
+  certificacion_info_id Int
+
+  Resume             resumes            @relation(fields: [resume_id], references: [id])
+  Certificacion_info certificacion_info @relation(fields: [certificacion_info_id], references: [id])
+}
+
+model education_info {
+  id Int @id @default(autoincrement())
+
+  end_date DateTime
+  degree             String
+  institution        String
+  location           String
+  score              Float
+  score_type         String
+  start_date         DateTime
+  study_type         String
+  sort_order         Int
+  education_resumes  education_resumes[]
+}
+
+model education_resumes {
+  id                Int @id @default(autoincrement())
+  resume_id         Int
+  education_info_id Int
+
+  Resume         resumes        @relation(fields: [resume_id], references: [id])
+  Education_info education_info @relation(fields: [education_info_id], references: [id])
+}
+
+model work_info {
+  id Int @id @default(autoincrement())
+
+  title         String
+  company       String
+  start_date    DateTime
+  end_date      DateTime
+  description   String
+  location      String
+  sort_order    Int
+  current_job   Boolean
+  works_resumes works_resumes[]
+}
+
+model works_resumes {
+  id           Int @id @default(autoincrement())
+  resume_id    Int
+  work_info_id Int
+
+  Resume    resumes   @relation(fields: [resume_id], references: [id])
+  Work_info work_info @relation(fields: [work_info_id], references: [id])
+}
+
+model link_info {
+  id Int @id @default(autoincrement())
+
+  network_id Int
+  url        String
+  username   String
+
+  links_networks links_networks[]
+}
+
+model links_networks {
+  id           Int    @id @default(autoincrement())
+  network_name String
+  resume_id    Int
+
+  link_info   link_info? @relation(fields: [link_infoId], references: [id])
+  link_infoId Int?
+  Resume      resumes    @relation(fields: [resume_id], references: [id])
+}
